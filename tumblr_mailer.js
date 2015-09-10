@@ -1,7 +1,11 @@
 var fs = require('fs');
 
+// Get friend list
 var csvFile = fs.readFileSync("friend_list.csv","utf8");
-console.log(csvFile);
+
+// Get email template
+var email_template = fs.readFileSync('email_template.html', 'utf-8');
+
 
 function csvParse(csvFile){
     var data_rows = [];
@@ -26,4 +30,16 @@ function csvParse(csvFile){
     return data_rows;
 }
 
-console.log(csvParse(csvFile));
+// Create customized emails for each contact
+var contacts = csvParse(csvFile);
+
+// Loop through the contacts to produce custom emails
+for (var i = 0; i < contacts.length; i++){
+    var email = email_template.replace("FIRST_NAME", contacts[i].firstName);
+    email = email.replace("NUM_MONTHS_SINCE_CONTACT", contacts[i].numMonthsSinceContact);
+    console.log(email);
+}
+
+
+
+
