@@ -11,6 +11,12 @@
 <p>
     I've been blogging about my experiences at Fullstack on my blog.
     Check out my new posts here:
+    <ul>
+    <% for(var i = 0; i < latestPosts.length; i++) {%>
+    <li><a href=<%= latestPosts[i].post_url %>> <%= latestPosts[i].title %></a>  </li>
+    <% } %>
+    </ul>
+
     <a href="http://www.sarah-codes.tumblr.com">My Blog</a>
 </p>
 <p>

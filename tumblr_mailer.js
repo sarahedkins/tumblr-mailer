@@ -8,7 +8,6 @@ var csvFile = fs.readFileSync("friend_list.csv","utf8");
 // Get email template
 var email_template = fs.readFileSync('email_template.html', 'utf-8');
 
-
 function csvParse(csvFile){
     var data_rows = [];
 
@@ -53,32 +52,35 @@ var client = tumblr.createClient({
 
 client.posts('sarah-codes.tumblr.com', function(err, blog){
     if (err) throw (err.message);
-    // console.log(blog);
-    console.log("Recent posts of blog: ");
-    getRecentPosts(blog);
-})
 
-// Use EJS to produce custom emails
-for (var i = 0; i < contacts.length; i++){
-    var customizedTemplate = ejs.render(email_template, {
-        firstName: contacts[i].firstName,
-        numMonthsSinceContact: contacts[i].numMonthsSinceContact
-    });
-    console.log(customizedTemplate);
-}
+    // Use EJS to produce custom emails
+    for (var i = 0; i < contacts.length; i++){
+        var customizedTemplate = ejs.render(email_template, {
+            firstName: contacts[i].firstName,
+            numMonthsSinceContact: contacts[i].numMonthsSinceContact,
+            latestPosts: getRecentPosts(blog)
+        });
+        console.log(customizedTemplate);
+    }
+});
+
 
 function getRecentPosts(blog) {
+    // Returns an array of the blog post objects that were posted within a week of current date.
+    var recentPosts = [];
     var currentDate = new Date();
     currentDate = currentDate.getTime(); // Put date into milliseconds
     for (var i = 0; i < blog.posts.length; i++){
-        var postTimestamp = blog.posts[i].timestamp;
-        postTimestamp = 1000 * postTimestamp; // Tumblr timestamp is in seconds, convert to milliseconds
-        var diff = currentDate - postTimestamp;
+        var published = blog.posts[i].timestamp;
+        published = 1000 * published; // Tumblr timestamp is in seconds, convert to milliseconds
+        var diff = currentDate - published;
         if (diff <= (7 * 86400000)){  // milliseconds per week
-            console.log("This post is in range ");
-            console.log(blog.posts[i].title);
+            recentPosts.push(blog.posts[i]);
         }
     }
+    console.log("recent posts ");
+    console.log(recentPosts);
+    return recentPosts;
 }
 
 
