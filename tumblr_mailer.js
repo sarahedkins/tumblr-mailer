@@ -1,6 +1,13 @@
 var fs = require('fs');
 var ejs = require('ejs');
 var tumblr = require('tumblr.js');
+var mandrill = require('mandrill-api/mandrill');
+var mandrill_client = new mandrill.Mandrill('peWOi3cypI_J_QfXVVw6Kw');
+
+// Sender details
+var my_name = "Sarah";
+var my_email = "edkins.sarah@gmail.com";
+var email_subject = "Check Out My Blog!";
 
 // Get friend list
 var csvFile = fs.readFileSync("friend_list.csv","utf8");
@@ -26,21 +33,12 @@ function csvParse(csvFile){
         }
         data_rows.push(object);
     }
-
     // Return array of objects
     return data_rows;
 }
 
 // Create customized emails for each contact
 var contacts = csvParse(csvFile);
-
-// Loop through the contacts to produce custom emails using .replace
-//for (var i = 0; i < contacts.length; i++){
-//    var email = email_template.replace("FIRST_NAME", contacts[i].firstName);
-//    email = email.replace("NUM_MONTHS_SINCE_CONTACT", contacts[i].numMonthsSinceContact);
-//    console.log(email);
-//}
-
 
 // Tumblr API
 var client = tumblr.createClient({
@@ -60,10 +58,10 @@ client.posts('sarah-codes.tumblr.com', function(err, blog){
             numMonthsSinceContact: contacts[i].numMonthsSinceContact,
             latestPosts: getRecentPosts(blog)
         });
-        console.log(customizedTemplate);
+        sendEmail(contacts[i].firstName, contacts[i].emailAddress, my_name, my_email,
+            email_subject, customizedTemplate);
     }
 });
-
 
 function getRecentPosts(blog) {
     // Returns an array of the blog post objects that were posted within a week of current date.
@@ -78,11 +76,38 @@ function getRecentPosts(blog) {
             recentPosts.push(blog.posts[i]);
         }
     }
-    console.log("recent posts ");
-    console.log(recentPosts);
     return recentPosts;
 }
 
+// Send Email
+function sendEmail(to_name, to_email, from_name, from_email, subject, message_html){
+    var message = {
+        "html": message_html,
+        "subject": subject,
+        "from_email": from_email,
+        "from_name": from_name,
+        "to": [{
+            "email": to_email,
+            "name": to_name
+        }],
+        "important": false,
+        "track_opens": true,
+        "auto_html": false,
+        "preserve_recipients": true,
+        "merge": false,
+        "tags": [
+            "Fullstack_Tumblrmailer_Workshop"
+        ]
+    };
+    var async = false;
+    var ip_pool = "Main Pool";
+    mandrill_client.messages.send({"message": message, "async": async, "ip_pool": ip_pool}, function(result) {
+    }, function(e) {
+        // Mandrill returns the error as an object with name and message keys
+        console.log('A mandrill error occurred: ' + e.name + ' - ' + e.message);
+        // A mandrill error occurred: Unknown_Subaccount - No subaccount exists with the id 'customer-123'
+    });
+}
 
 
 
