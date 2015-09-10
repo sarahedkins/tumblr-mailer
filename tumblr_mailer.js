@@ -69,42 +69,17 @@ for (var i = 0; i < contacts.length; i++){
 
 function getRecentPosts(blog) {
     var currentDate = new Date();
-    console.log("Current Date is " + currentDate);
-    var oneWeekPrior = aWeekAgo(currentDate);
-    console.log("One week prior  = " + oneWeekPrior);
+    currentDate = currentDate.getTime(); // Put date into milliseconds
     for (var i = 0; i < blog.posts.length; i++){
-        var postDate = blog.posts[i].date;
-        console.log("Post number " + i + " post Date is  ");
-        console.log(postDate);
-        if (postDate.getTime() >= oneWeekPrior.getTime()){
+        var postTimestamp = blog.posts[i].timestamp;
+        postTimestamp = 1000 * postTimestamp; // Tumblr timestamp is in seconds, convert to milliseconds
+        var diff = currentDate - postTimestamp;
+        if (diff <= (7 * 86400000)){  // milliseconds per week
             console.log("This post is in range ");
             console.log(blog.posts[i].title);
         }
     }
 }
-
-    // Functions to get a date one week prior to given date
-    function daysInMonth(month,year) {
-        // Use Jan = 1, Feb = 2, Mar = 3, etc to get num of day in month
-        return new Date(year, month, 0).getDate();
-    }
-
-    function aWeekAgo(date){
-        var currDate = date.getDate();
-        if (currDate > 7){
-            date.setDate(currDate - 7);
-            return date;
-        }
-        else {
-            var currMonth = date.getMonth();
-            var daysInPrevMonth = daysInMonth(currMonth, date.getYear());
-            var diff = currDate - 7;
-            date.setMonth(currMonth - 1);
-            date.setDate(daysInPrevMonth + diff);
-            return date;
-        }
-    }
-
 
 
 
